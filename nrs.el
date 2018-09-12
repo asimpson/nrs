@@ -1,7 +1,7 @@
 ;;; nrs.el --- An ivy function to list and execute npm scripts. -*- lexical-binding: t; -*-
 
 ;; Adam Simpson <adam@adamsimpson.net>
-;; Version: 0.1.0
+;; Version: 0.2.0
 ;; Package-Requires: ((ivy "9.0"))
 ;; Keywords: npm
 
@@ -13,7 +13,8 @@
 (defun nrs()
   "List all npm scripts via Ivy.  Default aciton is to run the script."
   (interactive)
-  (let* ((scripts (alist-get 'scripts (json-read-file (concat (locate-dominating-file (buffer-file-name) ".git") "package.json"))))
+  (let* ((file (or (dired-file-name-at-point) (buffer-file-name)))
+         (scripts (alist-get 'scripts (json-read-file (concat (locate-dominating-file file ".git") "package.json"))))
          (collection (mapcar (lambda(script) (list (concat (symbol-name (car script)) ": " (cdr script)) :script (symbol-name (car script)) :command (cdr script))) scripts)))
     (ivy-read "npm run: " collection :action (lambda(script) (async-shell-command (concat "npm run " (plist-get (cdr script) :script)))))))
 
